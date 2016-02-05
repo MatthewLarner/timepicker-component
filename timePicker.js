@@ -2,8 +2,8 @@ var doc = require('doc-js'),
     crel = require('crel'),
     morrison = require('morrison'),
     placeholder = placeholder,
-    hoursRegex = /^0[1-9]$|^1[0-2]$/,
-    minutesRegex = /^[0-5][0-9]$/,
+    hoursRegex = /^[0-9]$|^0[1-9]$|^1[0-2]$/,
+    minutesSecondsRegex = /^[0-5][0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
     timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):[0-5][0-9] (AM|PM)/;
 
@@ -16,36 +16,36 @@ function createInputSpan(settings){
     );
 }
 
+function valueChange(component) {
+    if(!component.element){
+        return;
+    }
+
+    var hours = component.hours(),
+        minutes = component.minutes(),
+        meridiem = component.meridiem(),
+        time = '';
+
+    if(!hours || !minutes || !meridiem) {
+        return;
+    } else {
+        time = hours + ':' + minutes + ':00 ' + meridiem;
+    }
+
+    component.time(time);
+    component.hoursInput.value = hours;
+    component.minutesInput.value = minutes;
+    component.meridiemInput.value = meridiem;
+}
+
 module.exports = function(fastn, component, type, settings, children){
     component.extend('_generic', settings, children);
-    component.setProperty('hours', fastn.property(null, function(value) {
-        component.hoursInput.value = hoursRegex.test(value) ? value : '';
-    }));
-    component.setProperty('minutes', fastn.property(null, function(value) {
-        component.minutesInput.value = minutesRegex.test(value) ? value : '';
-    }));
-    component.setProperty('meridiem', fastn.property(null, function(value) {
-        component.meridiemInput.value = meridiemRegex.test(value) ? value.toUpperCase() : '';
-    }));
 
-    component.setProperty('time', fastn.property(null, function update(time){
-        if(!time){
-            return;
-        }
-
-        var match = time.match(timeRegex);
-
-        if(!match) {
-            component.hours('');
-            component.minutes('');
-            component.meridiem('');
-        } else {
-            component.hours(match[1]);
-            component.minutes(match[2]);
-            component.meridiem(match[3]);
-        }
-        valueChange();
-    }));
+    function setInputProperty(key, input, regex){
+        component.setProperty(key, fastn.property(null, function(value) {
+            input.value = regex.test(value) ? value : '';
+        }));
+    }
 
     component.hoursInput = createInputSpan({
         class: 'hours',
@@ -57,6 +57,11 @@ module.exports = function(fastn, component, type, settings, children){
         sanitise: /^0?[0-9]$|^[0-5][0-9]$/
     });
 
+    component.secondsInput = createInputSpan({
+        class: 'seconds',
+        sanitise: /^0?[0-9]$|^[0-5][0-9]$/
+    });
+
     component.meridiemInput = crel('select', {
             class: 'meridiem',
         },
@@ -64,30 +69,34 @@ module.exports = function(fastn, component, type, settings, children){
         crel('option', {value: 'PM'}, 'PM')
     );
 
-    function valueChange() {
-        if(!component.element){
+    setInputProperty('hours', component.hoursInput, hoursRegex);
+    setInputProperty('minutes', component.minutesInput, minutesSecondsRegex);
+    setInputProperty('seconds', component.secondsInput, minutesSecondsRegex);
+    setInputProperty('meridiem', component.meridiemInput, meridiemRegex);
+
+    component.setProperty('time', fastn.property(null, function update(time){
+        if(!time){
             return;
         }
 
-        var hours = component.hours(),
-            minutes = component.minutes(),
-            meridiem = component.meridiem(),
-            time = '';
+        var match = time.match(timeRegex);
 
-        if(!hours || !minutes || !meridiem) {
-            return;
+        if(!match) {
+            component.hours('');
+            component.minutes('');
+            component.seconds('');
+            component.meridiem('');
         } else {
-            time = hours + ':' + minutes + ':00 ' + meridiem;
+            component.hours(match[1]);
+            component.minutes(match[2]);
+            component.seconds(match[3]);
+            component.meridiem(match[4]);
         }
+        valueChange(component);
+    }));
 
-        component.time(time);
-        component.hoursInput.value = hours;
-        component.minutesInput.value = minutes;
-        component.meridiemInput.value = meridiem;
-    }
-
-    component.on('change', valueChange);
-    component.on('attach', valueChange);
+    component.on('change', valueChange.bind(null, component));
+    component.on('attach', valueChange.bind(null, component));
 
     component.render = function() {
         component.element = crel('span', {class: 'timePicker'},
@@ -97,12 +106,14 @@ module.exports = function(fastn, component, type, settings, children){
                 ':'
             ),
             component.minutesInput,
+            component.secondsInput,
             component.meridiemInput
         );
 
         var docComponent = doc(component.componentElement),
             docHours = doc(component.hoursInput),
             docMinutes = doc(component.minutesInput),
+            docSeconds = doc(component.secondsInput),
             docMeridiem = doc(component.meridiemInput);
 
         component.meridiem('AM');
@@ -127,6 +138,10 @@ module.exports = function(fastn, component, type, settings, children){
             docComponent.addClass('focus');
         });
 
+        docSeconds.on('focus', function(event) {
+            docComponent.addClass('focus');
+        });
+
         docMeridiem.on('focus', function(event) {
             docComponent.addClass('focus');
         });
@@ -136,6 +151,10 @@ module.exports = function(fastn, component, type, settings, children){
         });
 
         docMinutes.on('blur', function(event) {
+            docComponent.removeClass('focus');
+        });
+
+        docSeconds.on('blur', function(event) {
             docComponent.removeClass('focus');
         });
 
