@@ -1,6 +1,7 @@
 var fastn = require('fastn')({
+    _generic: require('fastn/genericComponent'),
     text: require('fastn/textComponent'),
-    timePicker: require('./timePickerComponent')
+    timePicker: require('./timePicker')
 });
 
 module.exports = function(settings) {

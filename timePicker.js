@@ -5,7 +5,7 @@ var doc = require('doc-js'),
     hoursRegex = /^[0-9]$|^0[1-9]$|^1[0-2]$/,
     minutesSecondsRegex = /^[0-5][0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
-    timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):[0-5][0-9] (AM|PM)/;
+    timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/;
 
 function createInputSpan(settings){
     return crel('input', {
@@ -23,18 +23,20 @@ function valueChange(component) {
 
     var hours = component.hours(),
         minutes = component.minutes(),
+        seconds = component.seconds(),
         meridiem = component.meridiem(),
         time = '';
 
     if(!hours || !minutes || !meridiem) {
         return;
     } else {
-        time = hours + ':' + minutes + ':00 ' + meridiem;
+        time = hours + ':' + minutes + ':' + seconds + ' ' + meridiem;
     }
 
     component.time(time);
     component.hoursInput.value = hours;
     component.minutesInput.value = minutes;
+    component.secondsInput.value = seconds;
     component.meridiemInput.value = meridiem;
 }
 
@@ -48,18 +50,15 @@ module.exports = function(fastn, component, type, settings, children){
     }
 
     component.hoursInput = createInputSpan({
-        class: 'hours',
-        sanitise: /^0?[0-9]$|^[0-1][0-2]$/
+        class: 'hours'
     });
 
     component.minutesInput = createInputSpan({
-        class: 'minutes',
-        sanitise: /^0?[0-9]$|^[0-5][0-9]$/
+        class: 'minutes'
     });
 
     component.secondsInput = createInputSpan({
-        class: 'seconds',
-        sanitise: /^0?[0-9]$|^[0-5][0-9]$/
+        class: 'seconds'
     });
 
     component.meridiemInput = crel('select', {
@@ -166,11 +165,13 @@ module.exports = function(fastn, component, type, settings, children){
             parentElement: component.element,
             validators: {
                 '.timePicker .hours': /^0?[0-9]$|^[0-1][0-2]$/,
-                '.timePicker .minutes': /^0?[0-9]$|^[0-5][0-9]$/
+                '.timePicker .minutes': /^0?[0-9]$|^[0-5][0-9]$/,
+                '.timePicker .seconds': /^0?[0-9]$|^[0-5][0-9]$/
             }
         });
 
         component.emit('render');
+        return component;
     };
 
     return component;
