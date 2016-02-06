@@ -10,7 +10,7 @@ var doc = require('doc-js'),
 function createInputSpan(settings){
     return crel('input', {
             class: settings.class,
-            'data-sanitise': settings.sanitise
+            title: settings.class
         },
         settings.placeholder
     );
@@ -76,6 +76,7 @@ module.exports = function(fastn, component, type, settings, children){
 
     component.meridiemInput = crel('select', {
             class: 'meridiem',
+            title: 'meridiem'
         },
         crel('option', {value: 'AM'}, 'AM'),
         crel('option', {value: 'PM'}, 'PM')
