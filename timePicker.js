@@ -3,7 +3,7 @@ var doc = require('doc-js'),
     morrison = require('morrison'),
     placeholder = placeholder,
     hoursRegex = /^[0-9]$|^0[1-9]$|^1[0-2]$/,
-    minutesSecondsRegex = /^[0-5][0-9]$/,
+    minutesSecondsRegex = /^[0-5][0-9]$|^[0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
     timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/;
 
@@ -16,6 +16,18 @@ function createInputSpan(settings){
     );
 }
 
+function propertySet(value) {
+    return value >= 0 && value !== '' && value != null;
+}
+
+function intToString(value){
+    var result = value.toString();
+    result = result.length === 1 ? '0' + result : result;
+
+    return result;
+}
+
+
 function valueChange(component) {
     if(!component.element){
         return;
@@ -27,10 +39,10 @@ function valueChange(component) {
         meridiem = component.meridiem(),
         time = '';
 
-    if(!hours || !minutes || !seconds || !meridiem) {
+    if(!propertySet(hours) || !propertySet(minutes) || !propertySet(seconds) || !meridiem) {
         return;
     } else {
-        time = hours + ':' + minutes + ':' + seconds + ' ' + meridiem;
+        time = intToString(hours) + ':' + intToString(minutes) + ':' + intToString(seconds) + ' ' + meridiem;
     }
 
     component.time(time);
@@ -45,11 +57,6 @@ module.exports = function(fastn, component, type, settings, children){
 
     function setInputProperty(key, input, regex){
         component.setProperty(key, fastn.property(null, function(value) {
-            if(key !== 'meridiem') {
-                value = parseInt(value);
-                component[key](value);
-            }
-
             input.value = regex.test(value) ? value : '';
             valueChange(component);
         }));
@@ -92,9 +99,9 @@ module.exports = function(fastn, component, type, settings, children){
             component.seconds('');
             component.meridiem('');
         } else {
-            component.hours(match[1]);
-            component.minutes(match[2]);
-            component.seconds(match[3]);
+            component.hours(parseInt(match[1]));
+            component.minutes(parseInt(match[2]));
+            component.seconds(parseInt(match[3]));
             component.meridiem(match[4]);
         }
         valueChange(component);
