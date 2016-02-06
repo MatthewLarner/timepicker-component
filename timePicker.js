@@ -27,7 +27,7 @@ function valueChange(component) {
         meridiem = component.meridiem(),
         time = '';
 
-    if(!hours || !minutes || !meridiem) {
+    if(!hours || !minutes || !seconds || !meridiem) {
         return;
     } else {
         time = hours + ':' + minutes + ':' + seconds + ' ' + meridiem;
@@ -45,7 +45,13 @@ module.exports = function(fastn, component, type, settings, children){
 
     function setInputProperty(key, input, regex){
         component.setProperty(key, fastn.property(null, function(value) {
+            if(key !== 'meridiem') {
+                value = parseInt(value);
+                component[key](value);
+            }
+
             input.value = regex.test(value) ? value : '';
+            valueChange(component);
         }));
     }
 

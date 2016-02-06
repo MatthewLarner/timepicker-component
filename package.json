@@ -10,8 +10,8 @@
     "type": "git",
     "url": "git+https://github.com/MatthewLarner/timepicker-component.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Matt Larner <matt.larner.dev@gmail.com>",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/MatthewLarner/timepicker-component/issues"
   },
