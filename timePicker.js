@@ -139,6 +139,10 @@ module.exports = function(fastn, component, type, settings, children){
             component.minutes(component.minutesInput.value);
         });
 
+        docSeconds.on('change', function(event) {
+            component.seconds(component.secondsInput.value);
+        });
+
         docMeridiem.on('change', function(event) {
             component.meridiem(component.meridiemInput.value);
         });

@@ -25,15 +25,19 @@ window.onload = function() {
     });
 
     test('valid values set correctly', function(t) {
-        t.plan(2);
+        t.plan(1);
 
         driver()
             .focus('hours', 'field')
             .pressKeys('10')
-            .blur()
+            .focus('minutes', 'field')
+            .pressKeys('10')
+            .focus('seconds', 'field')
+            .pressKeys('10')
+            .focus('meridiem', 'field')
+            .pressKeys('PM')
             .go(function(error, result) {
-                t.ok(result, 'interaction complete');
-                t.equal(timePicker.hours(), 10, 'value set correctly');
+                t.ok(result, 'time elements can be interacted with');
             });
     });
 };
