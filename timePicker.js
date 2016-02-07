@@ -2,7 +2,7 @@ var doc = require('doc-js'),
     crel = require('crel'),
     morrison = require('morrison'),
     placeholder = placeholder,
-    hoursRegex = /^[0-9]$|^0[1-9]$|^1[0-2]$/,
+    hoursRegex = /^[1-9]$|^0[1-9]$|^1[0-2]$/,
     minutesSecondsRegex = /^[0-5][0-9]$|^[0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
     timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/;
@@ -40,8 +40,10 @@ function valueChange(component) {
         time = '';
 
     if(!propertySet(hours) || !propertySet(minutes) || !propertySet(seconds) || !meridiem) {
+        component.valid(false);
         return;
     } else {
+        component.valid(true);
         time = intToString(hours) + ':' + intToString(minutes) + ':' + intToString(seconds) + ' ' + meridiem;
     }
 
@@ -54,10 +56,15 @@ function valueChange(component) {
 
 module.exports = function(fastn, component, type, settings, children){
     component.extend('_generic', settings, children);
+    component.setProperty('valid');
 
     function setInputProperty(key, input, regex){
         component.setProperty(key, fastn.property(null, function(value) {
-            input.value = regex.test(value) ? value : '';
+            var validValue = regex.test(value);
+            input.value = validValue ? value : '';
+            if(!validValue) {
+                component[key](null);
+            }
             valueChange(component);
         }));
     }
@@ -95,10 +102,10 @@ module.exports = function(fastn, component, type, settings, children){
         var match = time.match(timeRegex);
 
         if(!match) {
-            component.hours('');
-            component.minutes('');
-            component.seconds('');
-            component.meridiem('');
+            component.hours(null);
+            component.minutes(null);
+            component.seconds(null);
+            component.meridiem(null);
         } else {
             component.hours(parseInt(match[1]));
             component.minutes(parseInt(match[2]));
