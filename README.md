@@ -1,8 +1,6 @@
 # timepicker-component
 A standalone time picker component built with `fastn.js`
 
-Get or set time strings in hh:mm:ss a format.
-
 # Usage
 
 ## Standalone
@@ -12,7 +10,7 @@ var createTimepicker = require('timepicker-component');
 var timePicker = createTimepicker();
 
 timePicker.time.on('change', function(time) {
-
+    // time is a string set to 12 hour format.
 })
 
 ```
