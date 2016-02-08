@@ -1,20 +1,10 @@
 var doc = require('doc-js'),
     crel = require('crel'),
     morrison = require('morrison'),
-    placeholder = placeholder,
     hoursRegex = /^[1-9]$|^0[1-9]$|^1[0-2]$/,
     minutesSecondsRegex = /^[0-5][0-9]$|^[0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
     timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/;
-
-function createInputSpan(settings){
-    return crel('input', {
-            class: settings.class,
-            title: settings.class
-        },
-        settings.placeholder
-    );
-}
 
 function propertySet(value) {
     return value >= 0 && value !== '' && value != null;
@@ -31,6 +21,14 @@ function intToString(value){
 function valueChange(component) {
     if(!component.element){
         return;
+    }
+
+    if(!component.secondsEnabled()) {
+        component.seconds(0);
+    }
+
+    if(!component.minutesEnabled()) {
+        component.minutes(0);
     }
 
     var hours = component.hours(),
@@ -58,6 +56,11 @@ module.exports = function(fastn, component, type, settings, children){
     component.extend('_generic', settings, children);
     component.setProperty('valid');
 
+    component.setProperty('minutesEnabled');
+    component.minutesEnabled(settings.minutesEnabled === false ? false: true);
+    component.setProperty('secondsEnabled');
+    component.secondsEnabled(settings.secondsEnabled === false ? false: true);
+
     function setInputProperty(key, input, regex){
         component.setProperty(key, fastn.property(null, function(value) {
             var validValue = regex.test(value);
@@ -69,16 +72,22 @@ module.exports = function(fastn, component, type, settings, children){
         }));
     }
 
-    component.hoursInput = createInputSpan({
-        class: 'hours'
+    component.hoursInput = crel('input',{
+        class: 'hours',
+        title: 'hours',
+        placeholder: 'hh'
     });
 
-    component.minutesInput = createInputSpan({
-        class: 'minutes'
+    component.minutesInput = crel('input', {
+        class: 'minutes',
+        title:' minutes',
+        placeholder: 'mm'
     });
 
-    component.secondsInput = createInputSpan({
-        class: 'seconds'
+    component.secondsInput = crel('input', {
+        class: 'seconds',
+        title: 'seconds',
+        placeholder: 'ss'
     });
 
     component.meridiemInput = crel('select', {
@@ -118,15 +127,20 @@ module.exports = function(fastn, component, type, settings, children){
     component.on('change', valueChange.bind(null, component));
     component.on('attach', valueChange.bind(null, component));
 
+    function createSeperator() {
+        return crel('span',
+            {class: 'seperator'},
+            ':'
+        );
+    }
+
     component.render = function() {
         component.element = crel('span', {class: 'timePicker'},
             component.hoursInput,
-            crel('span',
-                {class: 'seperator'},
-                ':'
-            ),
-            component.minutesInput,
-            component.secondsInput,
+            component.minutesEnabled() ? createSeperator() : null,
+            component.minutesEnabled() ? component.minutesInput : null,
+            component.secondsEnabled() ? createSeperator() : null,
+            component.secondsEnabled() ? component.secondsInput : null,
             component.meridiemInput
         );
 
