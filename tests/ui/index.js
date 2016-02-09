@@ -31,12 +31,31 @@ window.onload = function() {
         t.plan(1);
 
         driver()
-        .findUi('hours', 'field')
-        .findUi('minutes', 'field')
-        .findUi('seconds', 'field')
-        .findUi('meridiem', 'field')
-        .go(function(error, result){
-            t.ok(result, 'found timepicker elements');
-        });
+            .findUi('hours', 'field')
+            .findUi('minutes', 'field')
+            .findUi('seconds', 'field')
+            .findUi('meridiem', 'field')
+            .go(function(error, result){
+                t.ok(result, 'found timepicker elements');
+            });
     });
+
+    test('state', function(t) {
+        t.plan(3);
+
+        driver()
+            .changeValue('hours', 'field', '10')
+            .changeValue('minutes', 'field', '10')
+            .changeValue('seconds', 'field', '10')
+            .go(function(error, result) {
+                if(error) {
+                    console.log(error);
+                }
+
+                t.equal(timePicker.hours(), 10, 'hours set correctly');
+                t.equal(timePicker.minutes(), 10, 'minutes set correctly');
+                t.equal(timePicker.seconds(), 10, 'seconds set correctly');
+            });
+    });
+
 };

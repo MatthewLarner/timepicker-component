@@ -80,7 +80,7 @@ module.exports = function(fastn, component, type, settings, children){
 
     component.minutesInput = crel('input', {
         class: 'minutes',
-        title:' minutes',
+        title: 'minutes',
         placeholder: 'mm'
     });
 

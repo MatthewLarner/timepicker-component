@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "browserify -d ./tests | tape-run",
-    "test-ui": "browserify -d ./tests/ui -o ./tests/ui/index.browser.js && open ./tests/ui/index.html"
+    "test-ui": "watchify -d ./tests/ui -o ./tests/ui/index.browser.js & open ./tests/ui/index.html"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "morrison": "^1.0.2"
   },
   "devDependencies": {
-    "automagic-ui": "^1.0.0",
+    "automagic-ui": "^1.1.0",
     "browserify": "^13.0.0",
     "tape": "^4.4.0",
     "tape-run": "^2.1.3"
