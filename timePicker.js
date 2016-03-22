@@ -1,11 +1,11 @@
 var doc = require('doc-js'),
     crel = require('crel'),
     morrison = require('morrison'),
-    hoursRegex = /^[1-9]$|^0[1-9]$|^1[0-2]$/,
+    hoursRegex = /^[0-9]$|^0[0-9]$|^1[0-2]$/,
     minutesSecondsRegex = /^[0-5][0-9]$|^[0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
     withMeridiemRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/,
-    specRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) GMT.*/;
+    specRegex = /([0-1][0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9]) GMT.*/;
 
 function propertySet(value) {
     return value >= 0 && value !== '' && value != null;
@@ -58,9 +58,9 @@ module.exports = function(fastn, component, type, settings, children){
     component.setProperty('valid');
 
     component.setProperty('minutesEnabled');
-    component.minutesEnabled(settings.minutesEnabled === false ? false: true);
+    component.minutesEnabled(settings.minutesEnabled !== false);
     component.setProperty('secondsEnabled');
-    component.secondsEnabled(settings.secondsEnabled === false ? false: true);
+    component.secondsEnabled(settings.secondsEnabled !== false);
 
     function setInputProperty(key, input, regex){
         component.setProperty(key, fastn.property(null, function(value) {
@@ -111,17 +111,30 @@ module.exports = function(fastn, component, type, settings, children){
 
         var match = time.match(withMeridiemRegex) || time.match(specRegex);
 
-
         if(!match) {
             component.hours(null);
             component.minutes(null);
             component.seconds(null);
             component.meridiem(null);
         } else {
-            component.hours(parseInt(match[1]));
-            component.minutes(parseInt(match[2]));
-            component.seconds(parseInt(match[3]));
-            component.meridiem(match[4] || (parseInt(match[1]) > 12 ? 'PM' : 'AM'));
+
+            var hours = parseInt(match[1]),
+                minutes = parseInt(match[2]),
+                seconds = parseInt(match[3]),
+                meridiem = match[4] || (hours > 12 ? 'PM' : 'AM');
+
+            if(hours > 12){
+                hours -= 12;
+            }
+
+            if(hours === 0){
+                hours = 12;
+            }
+
+            component.hours(hours);
+            component.minutes(minutes);
+            component.seconds(seconds);
+            component.meridiem(meridiem);
         }
         valueChange(component);
     }));
