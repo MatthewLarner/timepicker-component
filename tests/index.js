@@ -25,6 +25,21 @@ test('set a valid time', function(t){
     t.equal(timePicker.meridiem(), 'AM', 'meridiem set correctly');
 });
 
+test('set a standard valid time', function(t){
+    t.plan(5);
+
+    var timePicker = createTimePicker(),
+        testTime = new Date('1/1/2011 12:45:00').toTimeString();
+
+    timePicker.time(testTime);
+
+    t.equal(timePicker.time(), '12:45:00 AM', 'Time set correctly');
+    t.equal(timePicker.hours(), 12, 'hours set correctly');
+    t.equal(timePicker.minutes(), 45, 'minutes set correctly');
+    t.equal(timePicker.seconds(), 0, 'seconds set correctly');
+    t.equal(timePicker.meridiem(), 'AM', 'meridiem set correctly');
+});
+
 test('set valid parts', function(t) {
     t.plan(5);
 

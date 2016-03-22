@@ -4,7 +4,8 @@ var doc = require('doc-js'),
     hoursRegex = /^[1-9]$|^0[1-9]$|^1[0-2]$/,
     minutesSecondsRegex = /^[0-5][0-9]$|^[0-9]$/,
     meridiemRegex = /^am$|^pm$|^AM$|^PM$/,
-    timeRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/;
+    withMeridiemRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) (AM|PM)/,
+    specRegex = /(0[1-9]|1[0-2]):([0-5][0-9]):([0-5][0-9]) GMT.*/;
 
 function propertySet(value) {
     return value >= 0 && value !== '' && value != null;
@@ -108,7 +109,8 @@ module.exports = function(fastn, component, type, settings, children){
             return;
         }
 
-        var match = time.match(timeRegex);
+        var match = time.match(withMeridiemRegex) || time.match(specRegex);
+
 
         if(!match) {
             component.hours(null);
@@ -119,7 +121,7 @@ module.exports = function(fastn, component, type, settings, children){
             component.hours(parseInt(match[1]));
             component.minutes(parseInt(match[2]));
             component.seconds(parseInt(match[3]));
-            component.meridiem(match[4]);
+            component.meridiem(match[4] || (parseInt(match[1]) > 12 ? 'PM' : 'AM'));
         }
         valueChange(component);
     }));
